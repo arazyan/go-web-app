@@ -86,6 +86,7 @@ func ListenAndServe(addr string, handler Handler) error {
 ```
 
 Решение - задать экземпляр сервера самостоятельно.
+
 ```go
   // creating a Server instance
 	server := http.Server{
@@ -98,5 +99,18 @@ func ListenAndServe(addr string, handler Handler) error {
 	}
   server.ListenAndServe()
 ```
+Это означает, что сервер будет ожидать на чтение и запись по 1 секунде, после этого соединение будет закрываться. Так, если мы посмотрим на следующую функцию: 
+```go
+func timeout(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Timeout attempt")
+	time.Sleep(2 * time.Second)
+	fmt.Fprint(w, "abobus amogusov")
+}
+```
+То с текущей конфигурацией сервера мы никогда не напечатаем на страничке "abobus amogusov". Потому что сервер будет занят фиктивным ```time.Sleep()``` и не дождется завершения функции.
 
-
+Чтобы все функция выполнялась до закрытия соединения, нам необходимо увеличить интервалы чтения и записи сервера: 
+```go
+  ReadTimeout: 3000,
+  WriteTimeout: 3000,
+```
