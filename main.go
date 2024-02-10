@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func handleFunction(w http.ResponseWriter, r *http.Request) {
@@ -29,22 +30,32 @@ func htmlText(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Hello World</h1>")
 }
 
+func timeout(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Timeout attempt")
+	time.Sleep(2 * time.Second)
+	fmt.Fprint(w, "Timeout did not happend")
+}
+
 func main() {
 	// http.HandleFunc() отвечает за mapping путей и страниц
 	// http.HandleFunc("/", handleFunction)
 	http.HandleFunc("/", htmlText)
+	http.HandleFunc("/timeout", timeout)
 
-	// 	err := http.ListenAndServe(":8080", nil)
+	// err := http.ListenAndServe(":8080", nil)
 	// 	if err != nil {
 	// 		fmt.Println(err)
 	// }
 
-	// configure a server
+	// creating a Server instance
 	server := http.Server{
-		Addr:    "",
+		Addr:    ":8080",
 		Handler: nil,
-		//
-		ReadTimeout: 1000, // 1000ms=1s
+
+		// manually added part
+		// ReadTimeout:  1000, // 1000ms=1s
+		// WriteTimeout: 1000,
 	}
+	server.ListenAndServe()
 
 }

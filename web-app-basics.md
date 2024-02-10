@@ -43,6 +43,8 @@
 
 
 ## Хендлинг запросов
+> Хендлер - это обработчик чего-то (событий, входящих сообщений, и т.д.)
+
 Сейчас у нас хендлится только корень нашего сайта - '/'. Все остальные паттерны, допустим: ```localhost:8080/ninja``` будут перенаправляться на ту же функцию, что и корень.
 
 Зададим роутинг запросов с помощью конструкции свитч-кейсов:
@@ -73,17 +75,24 @@ func htmlText(w http.ResponseWriter, r *http.Request) {
 Про другие заголовки ответов (responses) можно почитать [тут.](https://developer.mozilla.org/en-US/docs/Glossary/Response_header)
 ```
 ### Конфигурация сервера
-Представим, что мы хотим задать параметр **ReadTimeout** для сервера. Сделать это через ```http.ListenAndServe(":8080", nil)``` нельзя, т.к. если посмотреть на деф
-иницию этой функции, она берет указатель на **Server** и передает свои параметры в этот объект, вызывая затем его функцию ```ListenAndServe()```.
+Посмотрим на определение функции ```http.ListenAndServe()```:
 
 ```go
-// definition of http.ListenAndServe()
 func ListenAndServe(addr string, handler Handler) error {
-  // but Server object has ReadTimeout parameter inside of it's structure
 	server := &Server{Addr: addr, Handler: handler}
 	return server.ListenAndServe()
 }
 ```
+По сути, все, что она делает, так это создает экземпляр структуры **Server** с двумя полями *Addr* и *Handler*.
+
+А если мы заглянем в структуру **Server**, то найдем там больше полей:
+```go
+type Server struct {
+```
+
+Представим, что мы хотим задать параметр **ReadTimeout** для сервера. Сделать это через ```http.ListenAndServe(":8080", nil)``` нельзя, т.к. если посмотреть на деф
+иницию этой функции, она берет указатель на **Server** и передает свои параметры в этот объект, вызывая затем его функцию ```ListenAndServe()```.
+
 
 Решение - задать экземпляр сервера самостоятельно.
 
